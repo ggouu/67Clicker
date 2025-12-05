@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>67 Clicker</title>
+<style>
+  body { margin:0; overflow:hidden; background:#111; font-family:sans-serif; }
+  #ui { position:fixed; top:10px; left:10px; background:#222; padding:10px; border-radius:8px; color:white; }
+  #count { font-weight:bold; }
+  .shopBtn { width:100%; margin-bottom:8px; padding:8px; border:none; border-radius:8px; background:#444; color:white; cursor:pointer; transition:0.2s; }
+  .shopBtn:hover { transform:scale(1.05); background:#666; }
+</style>
+</head>
+<body>
+<div id="ui">67 Currency: <span id="count">0</span></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// Three.js Setup
+let scene=new THREE.Scene();
+let camera=new THREE.PerspectiveCamera(75,window.innerWidth/window.innerHeight,0.1,1000);
+let renderer=new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(window.innerWidth,window.innerHeight);
+document.body.appendChild(renderer.domElement);
+
+let light=new THREE.DirectionalLight(0xffffff,1);
+light.position.set(2,2,5);
+scene.add(light);
+
+let cubeGeo=new THREE.BoxGeometry(1.5,1.5,1.5);
+let cubeMat=new THREE.MeshStandardMaterial({color:0x67ff67, metalness:0.3, roughness:0.2, emissive:0x113311, emissiveIntensity:0.6});
+let cube=new THREE.Mesh(cubeGeo,cubeMat);
+scene.add(cube);
+
+camera.position.z=4;
+let count=0;
+let slangCount=0;
+let cps=0;
+
+// Raycaster for clicks
+const raycaster=new THREE.Raycaster();
+const mouse=new THREE.Vector2();
+const clickSound=new Audio('https://cdn.pixabay.com/download/audio/2022/03/15/audio_7d6b72c784.mp3?filename=click-124467.mp3');
+
+function spawnParticle(x,y){
+  const div=document.createElement('div');
+  div.textContent='67';
+  div.style.position='fixed';
+  div.style.left=x+'px';
+  div.style.top=y+'px';
+  div.style.color='#67ff67';
+  div.style.fontSize='20px';
+  div.style.opacity='1';
+  div.style.pointerEvents='none';
+  div.style.transition='1s ease-out';
+  document.body.appendChild(div);
+  setTimeout(()=>{ div.style.transform='translateY(-40px)'; div.style.opacity='0'; },10);
+  setTimeout(()=>div.remove(),1000);
+}
+
+document.addEventListener('click',(e)=>{
+  mouse.x=(e.clientX/window.innerWidth)*2-1;
+  mouse.y=-(e.clientY/window.innerHeight)*2+1;
+  raycaster.setFromCamera(mouse,camera);
+  const hit=raycaster.intersectObject(cube);
+  if(hit.length>0){
+    count++; document.getElementById('count').textContent=count;
+    clickSound.currentTime=0; clickSound.play();
+    spawnParticle(e.clientX,e.clientY);
+    let spinAmount=0;
+    const spinAnim=()=>{ spinAmount+=0.25; cube.rotation.z+=0.25; if(spinAmount<Math.PI*2){ requestAnimationFrame(spinAnim); } };
+    spinAnim();
+  }
+});
+
+// CPS from 67 Slang
+setInterval(()=>{
+  cps=slangCount*1;
+  count+=cps;
+  document.getElementById('count').textContent=count;
+},1000);
+
+function animate(){ requestAnimationFrame(animate); cube.rotation.y+=0.01; renderer.render(scene,camera); }
+animate();
+</script>
+
+<!-- Tabs -->
+<div id="shopTab" style="position:fixed; right:0; top:60px; width:40px; height:120px; background:#222; color:white; display:flex; align-items:center; justify-content:center; cursor:pointer; border-radius:10px 0 0 10px; box-shadow:0 0 10px rgba(0,0,0,0.5); writing-mode:vertical-rl; text-orientation:mixed;">Shop</div>
+<div id="ascTab" style="position:fixed; right:0; top:200px; width:40px; height:120px; background:#550088; color:white; display:flex; align-items:center; justify-content:center; cursor:pointer; border-radius:10px 0 0 10px; box-shadow:0 0 10px rgba(0,0,0,0.5); writing-mode:vertical-rl; text-orientation:mixed;">Ascend</div>
+<div id="upgradeTab" style="position:fixed; right:0; top:340px; width:40px; height:120px; background:#0066ff; color:white; display:flex; align-items:center; justify-content:center; cursor:pointer; border-radius:10px 0 0 10px; box-shadow:0 0 10px rgba(0,0,0,0.5); writing-mode:vertical-rl; text-orientation:mixed;">Upgrades</div>
+
+<!-- Shop Panels -->
+<div id="shop" style="position:fixed; right:-260px; top:10px; background:linear-gradient(135deg,#333,#111); padding:14px; border-radius:14px; color:white; width:240px; box-shadow:0 0 20px rgba(0,0,0,0.6); transition:0.4s ease;">
+  <h3 style='text-align:center; margin-top:0;'>Shop</h3>
+  <div id="cpsDisplay" style="margin-bottom:10px; text-align:center; font-size:14px; color:#67ff67;">CPS: 0</div>
+  <button class='shopBtn' id="cursorBtn">Buy 67 Cursor (10)</button>
+  <button class='shopBtn' id="slangBtn">Buy 67 Slang (50)</button>
+  <button class='shopBtn'>Buy 67 Farm (200)</button>
+  <button class='shopBtn'>Buy 67 Acres (800)</button>
+  <button class='shopBtn'>Buy 67 Company (3000)</button>
+</div>
+
+<div id="ascensionShop" style="position:fixed; right:-260px; top:150px; background:linear-gradient(135deg,#550088,#220033); padding:14px; border-radius:14px; color:white; width:240px; box-shadow:0 0 20px rgba(0,0,0,0.6); transition:0.4s ease;">
+  <h3 style='text-align:center; margin-top:0;'>Ascension Shop</h3>
+  <p style='font-size:14px;'>Ascension Tokens: <span id='ascTokens'>0</span></p>
+  <button class='shopBtn'>Buy 67 Potion (1)</button>
+</div>
+
+<div id="upgradeShop" style="position:fixed; right:-260px; top:260px; background:linear-gradient(135deg,#0044aa,#001122); padding:14px; border-radius:14px; color:white; width:240px; box-shadow:0 0 20px rgba(0,0,0,0.6); transition:0.4s ease;">
+  <h3 style='text-align:center; margin-top:0;'>Upgrades</h3>
+  <p style='font-size:14px; text-align:center;'>Extra Tiers (1–5)</p>
+  <button class='shopBtn'>67 Cursor Lv.1</button>
+  <button class='shopBtn'>67 Cursor Lv.2</button>
+  <button class='shopBtn'>67 Cursor Lv.3</button>
+  <button class='shopBtn'>67 Cursor Lv.4</button>
+  <button class='shopBtn'>67 Cursor Lv.5</button>
+  <hr style='opacity:0.3;'>
+  <button class='shopBtn'>67 Slang Lv.1</button>
+  <button class='shopBtn'>67 Slang Lv.2</button>
+  <button class='shopBtn'>67 Slang Lv.3</button>
+  <button class='shopBtn'>67 Slang Lv.4</button>
+  <button class='shopBtn'>67 Slang Lv.5</button>
+</div>
+
+<script>
+let shopOpen=false, ascOpen=false, upgradeOpen=false;
+shopTab.onclick=()=>{shopOpen=!shopOpen; shop.style.right=shopOpen?'10px':'-260px';};
+ascTab.onclick=()=>{ascOpen=!ascOpen; ascensionShop.style.right=ascOpen?'10px':'-260px';};
+upgradeTab.onclick=()=>{upgradeOpen=!upgradeOpen; upgradeShop.style.right=upgradeOpen?'10px':'-260px';};
+</script>
+</body>
