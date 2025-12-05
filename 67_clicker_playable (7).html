@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<title>67 Clicker</title>
+<style>
+  body { margin:0; overflow:hidden; background:#111; font-family:sans-serif; }
+  #ui { position:fixed; top:10px; left:10px; background:#222; padding:10px; border-radius:8px; color:white; }
+  #count { font-weight:bold; }
+</style>
+</head>
+<body>
+<div id="ui">67 Currency: <span id="count">0</span></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+ let scene=new THREE.Scene();
+ let camera=new THREE.PerspectiveCamera(75,window.innerWidth/window.innerHeight,0.1,1000);
+ let renderer=new THREE.WebGLRenderer({antialias:true});
+ renderer.setSize(window.innerWidth,window.innerHeight);
+ document.body.appendChild(renderer.domElement);
+
+ let light=new THREE.DirectionalLight(0xffffff,1);
+ light.position.set(2,2,5);
+ scene.add(light);
+
+ let cubeGeo=new THREE.BoxGeometry(1.5,1.5,1.5);
+ let cubeMat=new THREE.MeshStandardMaterial({
+  color: 0x67ff67,
+  metalness: 0.3,
+  roughness: 0.2,
+  emissive: 0x113311,
+  emissiveIntensity: 0.6
+});
+ let cube=new THREE.Mesh(cubeGeo,cubeMat);
+ scene.add(cube);
+
+ camera.position.z=4;
+ let count=0;
+
+ // click detection
+ const raycaster=new THREE.Raycaster();
+ const mouse=new THREE.Vector2();
+ // load click sound
+const clickSound = new Audio('https://cdn.pixabay.com/download/audio/2022/03/15/audio_7d6b72c784.mp3?filename=click-124467.mp3');
+
+// particle group
+let particles = [];
+
+function spawnParticle(x, y){
+  const div = document.createElement('div');
+  div.textContent = '67';
+  div.style.position = 'fixed';
+  div.style.left = x + 'px';
+  div.style.top = y + 'px';
+  div.style.color = '#67ff67';
+  div.style.fontSize = '20px';
+  div.style.opacity = '1';
+  div.style.pointerEvents = 'none';
+  div.style.transition = '1s ease-out';
+  document.body.appendChild(div);
+
+  setTimeout(()=>{
+    div.style.transform = 'translateY(-40px)';
+    div.style.opacity = '0';
+  },10);
+
+  setTimeout(()=> div.remove(),1000);
+}
+
+document.addEventListener('click', (e)=>{
+   mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+   mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+   raycaster.setFromCamera(mouse,camera);
+   const hit = raycaster.intersectObject(cube);
+   if(hit.length>0){
+     count++;
+     document.getElementById('count').textContent = count;
+
+     clickSound.currentTime = 0;
+     clickSound.play();
+
+     // cartoon spin animation
+     let spinAmount = 0;
+     const spinAnim = () => {
+       spinAmount += 0.25;
+       cube.rotation.z += 0.25;
+       if(spinAmount < Math.PI * 2){
+         requestAnimationFrame(spinAnim);
+       }
+     };
+     spinAnim();
+
+     spawnParticle(e.clientX, e.clientY);(e.clientX, e.clientY);
+   }
+});
+
+ function animate(){
+   requestAnimationFrame(animate);
+   cube.rotation.y+=0.01;
+   renderer.render(scene,camera);
+ }
+ animate();
+</script>
+<div id="shopTab" style="position:fixed; right:0; top:60px; width:40px; height:120px; background:#222; color:white; display:flex; align-items:center; justify-content:center; cursor:pointer; border-radius:10px 0 0 10px; box-shadow:0 0 10px rgba(0,0,0,0.5);">Shop</div>
+<div id="ascTab" style="position:fixed; right:0; top:200px; width:40px; height:120px; background:#550088; color:white; display:flex; align-items:center; justify-content:center; cursor:pointer; border-radius:10px 0 0 10px; box-shadow:0 0 10px rgba(0,0,0,0.5); writing-mode:vertical-rl; text-orientation:mixed;">Ascend</div>
+
+<div id="shop" style="position:fixed; right:-260px; top:10px; background:linear-gradient(135deg,#333,#111); padding:14px; border-radius:14px; color:white; width:240px; box-shadow:0 0 20px rgba(0,0,0,0.6); transition:0.4s ease;">
+  <h3 style='text-align:center; margin-top:0;'>Shop</h3>
+  <div id="cpsDisplay" style="margin-bottom:10px; text-align:center; font-size:14px; color:#67ff67;">CPS: 0</div>
+  <button class='shopBtn'>Buy 67 Cursor (10)</button>
+  <button class='shopBtn' id="slangBtn">Buy 67 Slang (50)</button>
+  <button class='shopBtn'>Buy 67 Farm (200)</button>
+  <button class='shopBtn'>Buy 67 Acres (800)</button>
+  <button class='shopBtn'>Buy 67 Company (3000)</button>
+</div>
+
+<div id="ascensionShop" style="position:fixed; right:-260px; top:150px; background:linear-gradient(135deg,#550088,#220033); padding:14px; border-radius:14px; color:white; width:240px; box-shadow:0 0 20px rgba(0,0,0,0.6); transition:0.4s ease;">
+  <h3 style='text-align:center; margin-top:0;'>Ascension Shop</h3>
+  <p style='font-size:14px;'>Ascension Tokens: <span id='ascTokens'>0</span></p>
+  <button class='shopBtn'>Buy 67 Potion (1)</button>
+</div>
+
+<script>
+let shopOpen = false;
+let ascOpen = false;
+let cps = 0;
+let slangCount = 0;
+
+// toggle shop
+shopTab.onclick = () => {
+  shopOpen = !shopOpen;
+  shop.style.right = shopOpen ? '10px' : '-260px';
+};
+
+// toggle ascension shop
+ascTab.onclick = () => {
+  ascOpen = !ascOpen;
+  ascensionShop.style.right = ascOpen ? '10px' : '-260px';
+};
+
+// click-per-second from 67 Slang
+setInterval(() => {
+  cps = slangCount * 1; // each slang gives 1 CPS
+  count += cps;
+  cpsDisplay.textContent = "CPS: " + cps;
+  document.getElementById('count').textContent = count;
+}, 1000);
+
+// slang purchase
+slangBtn.onclick = () => {
+  if(count >= 50){
+    count -= 50;
+    slangCount++;
+    document.getElementById('count').textContent = count;
+  }
+};
+</script>
+</body>
+</html>
